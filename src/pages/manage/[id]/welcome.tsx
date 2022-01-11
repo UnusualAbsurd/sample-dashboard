@@ -10,6 +10,10 @@ import Image from "next/image";
 import { Avatar } from "../../../components/Avatar";
 import { toast } from "react-toastify";
 import Dropdown from "../../../components/ui/Dropdown";
+interface OptionPost {
+  channel?: string;
+  message?: string;
+}
 
 interface Props {
   user?: User;
@@ -40,6 +44,32 @@ export default function GeneralSetting({ user, guilds }: Props) {
   const [pickedChannel, setPickedChannel] = useState<string>();
   const [welcomeMessage, setWelcomeMessage] = useState("");
   const [pickedChannelId, setPickedChannelId] = useState("");
+  const [currentSetChannel, setCurrentSetChannel] = useState("");
+
+  function changeChannel(origin: string, options: OptionPost) {
+    console.log(
+      origin +
+        "/api/client/guilds/" +
+        id +
+        "/welcome" +
+        `?${options.channel ? `channel=${options.channel}` : ""}${
+          options.message ? `&message=${options.message}` : ""
+        }`
+    );
+
+    return fetch(
+      origin +
+        "/api/client/guilds/" +
+        id +
+        "/welcome" +
+        `?${options.channel ? `channel=${options.channel}` : ""}${
+          options.message ? `&message=${options.message}` : ""
+        }`,
+      {
+        method: "POST",
+      }
+    );
+  }
 
   function getChannels(origin: string): Promise<Array<GuildChannel>> {
     return fetch(origin + "/api/client/guilds/" + id + "/channels", {
@@ -47,6 +77,36 @@ export default function GeneralSetting({ user, guilds }: Props) {
     }).then(async (e) => {
       const res = await e.json();
       return res.filter((e: any) => e.type == 0);
+    });
+  }
+
+  function getCurrentSetChannel(origin: string) {
+    return fetch(origin + "/api/client/guilds/" + id + "/welcome", {
+      method: "GET",
+    }).then(async (e) => {
+      const res = await e.json();
+      if (res.error) return undefined;
+      else {
+        const fetchedChannel = await fetchChannel(origin, res.channel);
+        return await fetchedChannel;
+      }
+    });
+  }
+
+  function fetchChannel(origin: string, channel_id: string) {
+    return fetch(
+      origin +
+        "/api/client/guilds/" +
+        id +
+        "/channels?channel_id=" +
+        channel_id,
+      {
+        method: "POST",
+      }
+    ).then(async (e) => {
+      const res = await e.json();
+      if (res.error) return undefined;
+      else return res.name;
     });
   }
 
@@ -79,6 +139,10 @@ export default function GeneralSetting({ user, guilds }: Props) {
       });
 
       setChannels(array);
+    });
+
+    getCurrentSetChannel(window.origin).then((e) => {
+      setCurrentSetChannel(e);
     });
   }, []);
 
@@ -115,7 +179,11 @@ export default function GeneralSetting({ user, guilds }: Props) {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <div className="text-dark-400 dark:text-white">
-                  {pickedChannel ? pickedChannel : "Pick the channel to set"}{" "}
+                  {pickedChannel
+                    ? pickedChannel
+                    : currentSetChannel
+                    ? `#${currentSetChannel}`
+                    : "Pick the channel to set"}{" "}
                 </div>
               </div>
             }
@@ -154,6 +222,11 @@ export default function GeneralSetting({ user, guilds }: Props) {
                       />
                     ),
                   });
+
+                changeChannel(origin, {
+                  channel: pickedChannelId ? pickedChannelId : undefined,
+                  message: welcomeMessage ? welcomeMessage : undefined,
+                });
 
                 toast.dark(`Successfully saved the changes`, {
                   position: toast.POSITION.TOP_RIGHT,

@@ -37,7 +37,7 @@ export default function Dashboard({ user, guilds }: Props) {
       }
     }
 
-    setTimeout(() => setLoading(false), 3000);
+    setTimeout(() => setLoading(false), 2000);
     setLoadedGuilds(null);
 
     fetch(origin + "/api/client/guilds").then(async (e) => {
@@ -60,10 +60,10 @@ export default function Dashboard({ user, guilds }: Props) {
             <table>
               {guilds &&
                 gridGuilds?.map((row, index) => (
-                  <tr key={row[0]}>
+                  <tr key={row[index]}>
                     {row.map((gd: any) => {
                       return (
-                        <th key={gd}>
+                        <th key={index}>
                           <div className="border-d-tab space-x-4">
                             <div className="border-l-2 border-transparent relative">
                               <div className="py-6 px-3 max-w-sm mx-auto bg-white rounded-xl shadow-md items-center space-x-3 backdrop-blur">
