@@ -45,6 +45,7 @@ export default function GeneralSetting({ user, guilds }: Props) {
   const [welcomeMessage, setWelcomeMessage] = useState("");
   const [pickedChannelId, setPickedChannelId] = useState("");
   const [currentSetChannel, setCurrentSetChannel] = useState("");
+  const [messageDropdownOpen, setMessageDropdownOpen] = useState(false);
 
   function changeChannel(origin: string, options: OptionPost) {
     console.log(
@@ -171,7 +172,7 @@ export default function GeneralSetting({ user, guilds }: Props) {
               </div>
             </div>
           </div>
-          <p>Welcome Message Channel</p>
+          <p>Welcome Channel</p>
           <Dropdown
             content={
               <div
@@ -192,8 +193,34 @@ export default function GeneralSetting({ user, guilds }: Props) {
               setPickedChannelId(`${customId}`);
             }}
             options={channels}
-          ></Dropdown>
-          <p>Welcome Message</p>
+          />
+          <p>Welcome Channel</p>
+          <Dropdown
+            content={
+              <div
+                className="flex items-center space-x-2 p-2"
+                onClick={() => setMessageDropdownOpen(!dropdownOpen)}
+              >
+                <div className="text-dark-400 dark:text-white">
+                  Welcome Message Options
+                </div>
+              </div>
+            }
+            options={[
+              {
+                label: "{user.tag} - Display the user tag",
+                variant: "normal",
+              },
+              {
+                label: "{user.id} - Display the user ID",
+                variant: "normal",
+              },
+              {
+                label: "{guild} - Display the server name",
+                variant: "normal",
+              },
+            ]}
+          />
           <textarea
             className=" 
             w-full bg-light-500 dark:bg-main-500 px-2 py-3 outline-none text-black dark:text-light-300 text-sm h-36 overflow-hidden rounded-md placeholder-gray-500"
